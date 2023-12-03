@@ -4,14 +4,12 @@
 \alias{LReg}
 \title{A main function that calculates useful values used to fit the linear model}
 \usage{
-LReg(myformula, mydata, myclass = "tconf")
+LReg(myformula, mydata)
 }
 \arguments{
 \item{myformula}{a formula of the model that includes response and covariates}
 
 \item{mydata}{data where we fit the linear model}
-
-\item{myclass}{assign a class to the object}
 }
 \value{
 a list of useful values

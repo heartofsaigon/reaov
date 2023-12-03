@@ -2,7 +2,6 @@
 #'
 #' @param myformula a formula of the model that includes response and covariates
 #' @param mydata data where we fit the linear model
-#' @param myclass assign a class to the object
 #'
 #' @return a list of useful values
 #'
@@ -10,7 +9,7 @@
 #'
 #' @examples LReg(Species ~ Area +Elevation+ Nearest+ Scruz+ Adjacent, mydata1)
 
-LReg = function(myformula, mydata, myclass = "tconf"){
+LReg = function(myformula, mydata){
 
   fo = as.character(myformula)
   response = fo[2]
@@ -48,7 +47,42 @@ LReg = function(myformula, mydata, myclass = "tconf"){
     sigma2_naive = sigma2_naive, sigma2_cor = sigma2_cor
   )
 
-  class(result)<- c(myclass, class(result))
-  result
+  class(result)<- "tconf"
+  invisible(result)
 }
+
+#' A method function that calculates t-test for each coefficient
+#'
+#' @param x an object of LReg
+#' @param ... redundant argument
+#'
+#' @return estimates, standard error, and confidence intervals of coefficients
+#' @export
+
+print.tconf = function(x,...){
+  print(x[["beta_hat"]])
+}
+
+#' A method function that modifies the class of LReg object
+#'
+#' @param object an object of LReg
+#' @param myclass the new class you want to add to the object
+#'
+#' @return the LReg object with the new class
+#' @export
+
+AddClass<- function(object, myclass = NULL){
+
+  obj_name<- deparse(substitute(object)) # get name of object and transfer it to string
+  obj_env<- pryr::where(obj_name) # get the environment of the object
+  class(object)<- unique(c(myclass, class(object))) # revise the class of object
+  assign(obj_name, object, envir = obj_env) # assign it to object in its original environment
+
+}
+
+###################################################################
+utils::globalVariables(c("x", "sigma2_cor", "beta_hat", "n", "p"))
+
+
+
 

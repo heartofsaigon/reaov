@@ -15,4 +15,9 @@ Depends:
     R (>= 2.10)
 LazyData: true
 Imports: 
-     dplyr, stringr, tibble
+     dplyr, stringr, tibble, pryr
+Suggests: 
+    knitr,
+    rmarkdown,
+    kableExtra
+VignetteBuilder: knitr
