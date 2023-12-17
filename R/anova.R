@@ -79,8 +79,9 @@ ano2 = function(response, covariates){
   }
 
   n = length(covariates)
-  n_p = n-G
   G = length(levels(new_x))
+  n_p = n-G
+
   G_p = G-1
   F_stat = (BSS/(G-1))*(n-G/WSS)
   p_value = stats::pf(F_stat,G_p,n_p, lower.tail=FALSE)

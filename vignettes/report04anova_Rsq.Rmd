@@ -29,15 +29,15 @@ summary(mydata2)
 We specify that the response variable is the odor, and then check the ano2 function with the covariate temp:
 
 ```{r}
-#ano2(mydata2$odor,mydata2$temp)
+ano2(mydata2$odor,mydata2$temp)
 ```
 The output is the standard ANOVA table for a one-way ANOVA test. We list the degrees of freedom in the data, the between group and total sums of squared along with mean squared errors, and lastly the F-statistic and p-value. Here, as the p-value is small, we see that we would reject the null hypothesis that the population means of each subpopulation (those corresponding to distinct levels of the factor "temp" here) are the same. 
 
 We can run this on the other two covariates to see the results:
 
 ```{r}
-#ano2(mydata2$odor, mydata2$gas)
-#ano2(mydata2$odor, mydata2$pack)
+ano2(mydata2$odor, mydata2$gas)
+ano2(mydata2$odor, mydata2$pack)
 ```
 The results likewise tell us to reject the null hypotheses in these one-way ANOVA tests. 
 

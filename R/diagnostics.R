@@ -44,7 +44,7 @@ Diagnostic_Plots = function(object){
   #residuals vs covariates
   for(x_name in x_names){
     list_plots[[paste("residuals_v_", x_name, sep = '')]] <- diagnostics_tib |>
-      ggplot2::ggplot(ggplot2::aes(x = dplyr::.data[[x_name]], y = e_hat)) +
+      ggplot2::ggplot(ggplot2::aes(x = !!rlang::sym(x_name), y = e_hat)) +
       ggplot2::geom_point() +
       ggplot2::geom_hline(yintercept = 0, linetype = "dotted", color = "red")+
       ggplot2::labs(title = paste("Residuals vs", x_name),
