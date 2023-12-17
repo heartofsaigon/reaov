@@ -1,0 +1,53 @@
+---
+title: "anova&R_sq"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{report04}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(reaov);
+```
+
+
+This vignette explains how to use the ano2 and Rsquared functions. We will test the function ano2 on mydata2, whose covariates are categorical. We will then use mydata1 to show the Rsquared function.
+
+```{r}
+summary(mydata2)
+```
+We specify that the response variable is the odor, and then check the ano2 function with the covariate temp:
+
+```{r}
+#ano2(mydata2$odor,mydata2$temp)
+```
+The output is the standard ANOVA table for a one-way ANOVA test. We list the degrees of freedom in the data, the between group and total sums of squared along with mean squared errors, and lastly the F-statistic and p-value. Here, as the p-value is small, we see that we would reject the null hypothesis that the population means of each subpopulation (those corresponding to distinct levels of the factor "temp" here) are the same. 
+
+We can run this on the other two covariates to see the results:
+
+```{r}
+#ano2(mydata2$odor, mydata2$gas)
+#ano2(mydata2$odor, mydata2$pack)
+```
+The results likewise tell us to reject the null hypotheses in these one-way ANOVA tests. 
+
+As for the Rsquared function, we use the example from the introduction vignette:
+
+```{r}
+modfit<- LReg(Species ~ Area +Elevation+ Nearest+ Scruz+ Adjacent, mydata1)
+Rsquared(modfit)
+```
+Given the model, the Rsquared funtion returns the R squared and the adjusted R squared values of the model. 
+
+
+

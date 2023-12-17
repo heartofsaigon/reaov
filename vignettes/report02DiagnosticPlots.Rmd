@@ -1,0 +1,114 @@
+---
+title: "Diagnostic Plots Vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{report02}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(reaov); library(ggplot2); library(dplyr)
+
+```
+
+```{r, include = FALSE}
+
+Diagnostic_Plots = function(object){
+  diagnostics_tib <- as_tibble(c(list(
+    e_hat = object$e_hat,
+    e_hat_st = object$e_hat/diag(object$hat_mat),
+    y_hat = object$y_hat),
+    data.frame(object$x[,2:dim(object$x)[2]])
+  ))
+  x_names <- colnames(data.frame(object$x[,2:dim(object$x)[2]]))
+
+  #make an empty list of plots, names are already filled in
+  list_names <- c("residuals_v_fitted",
+                  "residuals_hist",
+                  paste("residuals_v_", x_names, sep = ''), #residuals_v_xi
+                  "qq_standardized_residuals"
+  )
+  list_plots <- setNames(vector(mode = "list", length=length(list_names)), list_names)
+
+  #residuals vs fitted values
+  list_plots$residuals_v_fitted <- diagnostics_tib %>%
+    ggplot(aes(x = y_hat, y = e_hat)) +
+    geom_point() +
+    geom_hline(yintercept = 0, linetype = "dotted", color = "red")+
+    labs(title = "Residuals vs Fitted Values",
+         x = "Fitted Value",
+         y = "Residual")
+
+  #residuals histogram
+  list_plots$residuals_hist <- diagnostics_tib %>%
+    ggplot(aes(x = e_hat)) +
+    geom_histogram()+
+    labs(title = "Residuals Histogram",
+         x = "Residual")
+
+  #residuals vs covariates
+  for(x_name in x_names){
+    list_plots[[paste("residuals_v_", x_name, sep = '')]] <- diagnostics_tib %>%
+      ggplot(aes(x = .data[[x_name]], y = e_hat)) +
+      geom_point() +
+      geom_hline(yintercept = 0, linetype = "dotted", color = "red")+
+      labs(title = paste("Residuals vs", x_name),
+           x = x_name,
+           y = "Residual")
+  }
+
+  #qq plot of standardized residuals vs theoretical quantile
+  list_plots$qq_standardized_residuals <- diagnostics_tib %>%
+    ggplot(aes(sample = e_hat_st))+
+    geom_qq() +
+    geom_qq_line(color = "red") +
+    labs(title = "Normal QQ Plot Standardized Residuals",
+         x = "Theoretical",
+         y = "Standardized Residual")
+
+  return(list_plots)
+}
+```
+
+This vignette will describe how to use the Diagnostic Plots function.
+We will create a model with LReg on our dataset mydata1 and proceed to go through the diagnostic plots
+```{r}
+modfit<- LReg(Species ~ Area +Elevation+ Nearest+ Scruz+ Adjacent, mydata1)
+plots <- Diagnostic_Plots(modfit)
+```
+Diagnostic Plots returns a list of diagnostic plots. We will go through them.
+
+First, we have the residuals vs fitted values plot. This plot is to visually check if there is a violation of homoskedasticity in the model. While it may be hard to see with not so many points, it looks like the homoskedasticity is holding up.
+```{r}
+plots$residuals_v_fitted
+```
+
+
+Below are residuals vs covariate plots. These check if the conditional expectation given the covariates of the residuals is indeed 0. These do not appear wildly violated, but we do not have many points and it is difficult to see with the longitudinal spread of this data.
+```{r}
+plots$residuals_v_Area
+plots$residuals_v_Elevation
+plots$residuals_v_Adjacent
+plots$residuals_v_Scruz
+plots$residuals_v_Nearest
+```
+
+Below is a qqplot of the standardized residuals. The theoretical quantiles being used are from the Normal distribution, so we are checking visually the assumption of normal standardized residuals. This only happens if we a linear regression function, homoskedascticity, and uncorrelated errors. As we can see below, the observed quantiles match the theoretical ones quite well.
+```{r}
+plots$qq_standardized_residuals
+```
+
+We can also look at the historgam of the residuals. We expect to see a normal looking distribution.
+```{r}
+plots$residuals_hist
+```

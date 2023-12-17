@@ -1,0 +1,52 @@
+---
+title: "modelcomp"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{report03}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(reaov);
+```
+
+
+This vignette will describe how to use the model_comparison function.
+
+First we have an example on the dataset mydata1. We create a large model and a small model included in it. We test the null hypothesis that the small model is correct using the F-test for model comparison. We will see the f-statistic as well as the p-value.
+
+
+
+```{r}
+large_model<- LReg(Species ~ Area +Elevation+ Nearest+ Scruz+ Adjacent, mydata1)
+small_model <- LReg(Species ~ Area +Elevation+ Nearest, mydata1)
+```
+
+```{r}
+ModelComparison(large_model, small_model)
+```
+
+We see from the p-value that the null hypothesis is rejected at the 5% level. There is evidence that we should not use the small model in favor of the larger model.
+
+We can also try this on categorical data, essentially doing something similar to the f test for anova. We will do this on mydata2 to see if we can get rid of the category pack.
+
+```{r}
+large_model <- LReg(odor ~ temp + gas + pack, mydata2)
+small_model <- LReg(odor ~ temp + gas, mydata2)
+```
+
+```{r}
+ModelComparison(large_model, small_model)
+```
+
+Since the null hypothesis is not rejected, there is not sufficient evidence to reject our smaller model without pack.
