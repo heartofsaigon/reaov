@@ -1,3 +1,7 @@
+#########################################################################################
+### Methods
+#########################################################################################
+
 #' A method function that calculates t-test for each coefficient
 #'
 #' @param object an object of LReg
@@ -69,14 +73,14 @@ summary.CIresponse = function(object, x_star = NULL, alpha = 0.05, ...){
   mean_res<-
     mapply(function(x,y) x + c(-1,1)*y, y_star, stats::qt(1-alpha/2, object$n - object$p-1)*se_mean_res)|>
     t()|>
-    `colnames<-`(c("lower_response", "upper_response"))
+    `colnames<-`(c("lower_mean_response", "upper_mean_response"))
 
 
   se_mean_new_res = sqrt(diag(x%*%object$xtx_inv%*%t(x)+1)%*%object$sigma2_cor)
   mean_new_res<-
     mapply(function(x,y) x + c(-1,1)*y, y_star, stats::qt(1-alpha/2, object$n - object$p-1)*se_mean_new_res)|>
     t()|>
-    `colnames<-`(c("lower_future", "upper_future"))
+    `colnames<-`(c("lower_response", "upper_response"))
 
   (result<- cbind(y_star = y_star, mean_res, mean_new_res)|> dplyr::as_tibble())
 
@@ -93,25 +97,26 @@ summary.CIresponse = function(object, x_star = NULL, alpha = 0.05, ...){
 #' Calculate joint hypothesis testing for the model parameters
 #'
 #' @param object an object of LReg
-#' @param beta the values of testing
 #' @param alpha level of significance (default is 0.05)
 #' @param ... redundant argument
 #'
-#' @return F statistic, lower and upper bound of F distribution at the level of alpha, and significance status
+#' @return F statistic, quantile of F distribution at the level of 1-alpha, and significance status
 #' @export
 #'
 
-summary.JCRpars = function(object, beta = rep(0,object$p+1), alpha = 0.05,...){
+summary.JCRpars = function(object, alpha = 0.05, ...){
 
-
+  beta = rep(0,object$p+1)
   d = object$beta_hat - as.matrix(beta)
 
-  Fstat = (t(d)%*%solve(object$xtx_inv)%*%d)/(object$p+1)/object$sigma2_cor
-  ci = stats::qf(c(alpha/2,1-alpha/2), object$p+1, object$n - object$p-1)
+  Fstat = (t(d)%*%solve(object$xtx_inv)%*%d)/(object$p+1)/object$sigma2_cor # inverse of inverse is X'X
+  ci = stats::qf(c(1-alpha), object$p+1, object$n - object$p-1)
+
+  upper_point = paste0((1-alpha)*100,"%")
 
   (result<-
-  dplyr::tibble(Fstat = c(Fstat), "lower" = ci[1], "upper" = ci[2])|>
-    dplyr::mutate(significance = dplyr::if_else(Fstat<= lower | Fstat > upper, "[+]", "[-]")))
+  dplyr::tibble(Fstat = c(Fstat), !!rlang::sym(upper_point) := ci)|>
+    dplyr::mutate(significance = dplyr::if_else(Fstat > !!rlang::sym(upper_point), "[+]", "[-]")))
 
   obj_name<- deparse(substitute(object)) # get name of object and transfer it to string
   obj_env<- pryr::where(obj_name) # get the environment of the object
@@ -123,43 +128,90 @@ summary.JCRpars = function(object, beta = rep(0,object$p+1), alpha = 0.05,...){
 }
 
 #########################################################################################
+### functions
+#########################################################################################
 
 
 #' Calculate F statistic for contrast comparisons
 #'
 #' @param object an object of LReg
 #' @param R a matrix of contrast
-#' @param r the values of testing (default is 0)
 #' @param alpha level of significance (default is 0.05)
 #'
-#' @return F statistic, lower and upper bound of F distribution at the level of alpha, and significance status
+#' @return F statistic, quantile of F distribution at the level of 1-alpha, and significance status
 #' @export
 #'
 
-ContrastTest = function(object, R, r = rep(0,nrow(R)), alpha = 0.05){
+ContrastTest = function(object, R, alpha = 0.05){
 
-  if(is.vector(R)) stop("R must be in a metrix form")
+  if(is.vector(R)) stop("R must be in a matrix form")
   if(ncol(R) != (object$p+1)) stop(paste("The number columns of R must equal", object$p+1))
-  if(length(r) != nrow(R)) stop(paste("The length of r must equal", nrow(R)))
 
+  r = rep(0,nrow(R))
   r = as.matrix(r)
   k = nrow(r)
 
   d = R%*%object$beta_hat - r
-  v = solve(R%*%object$xtx_inv%*%t(R)*c(object$sigma2_cor))
+  v = solve(R%*%object$xtx_inv%*%t(R)*c(object$sigma2_cor)) # bring the sigma_cor to the numerator
 
   Fstat = t(d)%*%v%*%d/k
-  ci = stats::qf(c(alpha/2,1-alpha/2), k, object$n - object$p-1)
+  ci = stats::qf(c(1-alpha), k, object$n - object$p-1)
+
+  upper_point = paste0((1-alpha)*100,"%")
+
   (result<-
-  dplyr::tibble('Fstat' = c(Fstat), 'lower' = ci[1], 'upper' = ci[2])|>
-    dplyr::mutate(significance = dplyr::if_else(Fstat<= lower | Fstat > upper, "[+]", "[-]")))
+  dplyr::tibble('Fstat' = c(Fstat),  !!rlang::sym(upper_point) := ci)|>
+    dplyr::mutate(significance = dplyr::if_else(Fstat > !!rlang::sym(upper_point), "[+]", "[-]")))
 
   message(paste('[+] indicates significant, and [-] is insignificant.\n alpha =', alpha))
   return(result)
 }
 
 #########################################################################################
-utils::globalVariables(c("x", "sigma2_cor", "beta_hat", "n", "p", "lower", "upper"))
+
+#' Calculate F statistic to test sub-vector of coefficients
+#'
+#' @param object an object of LReg
+#' @param reduced a vector of numbers relating to the ordering of reduced predictors (The ordering depends on the formula in the object of LReg)
+#' @param alpha level of significance (default is 0.05)
+#'
+#' @return F statistic,  quantile of F distribution at the level of 1-alpha, and significance status
+#' @export
+#'
+
+
+SubsetBetaTest = function(object, reduced = 1 , alpha = 0.05){
+
+  if(sum(reduced < 1)>0 | sum(reduced> (object$p+1))>0){
+    stop(paste("reduced predictors are within", 1, "and", object$p+1))
+  }
+
+  fullmodX = crossprod(object$y_hat, object$y_hat)
+
+  X = object$x[, -reduced]
+  H0modX2 = c(t(object$y)%*%X%*%solve(t(X)%*%X)%*%t(X)%*%object$y)
+
+  modX1 = fullmodX - H0modX2
+
+  Ftest = c(modX1/length(reduced)/crossprod(object$e_hat, object$e_hat)*(object$n - object$p-1))
+  ci = stats::qf(c(1-alpha), length(reduced), (object$n - object$p-1))
+
+  upper_point = paste0((1-alpha)*100,"%")
+
+
+  (result<-
+      dplyr::tibble(`Fstat` = Ftest, !!rlang::sym(upper_point) := ci )|>
+      dplyr::mutate(significance = dplyr::if_else(Fstat > !!rlang::sym(upper_point), "[+]", "[-]")))
+
+  message(paste('[+] indicates significant, and [-] is insignificant.\n alpha =', alpha))
+
+  return(result)
+}
+
+
+#########################################################################################
+utils::globalVariables(c("x", "sigma2_cor", "beta_hat", "n", "p", "lower", "upper", "Fstat",
+                         ":=", "0%"))
 
 
 

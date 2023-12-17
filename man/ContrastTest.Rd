@@ -4,19 +4,17 @@
 \alias{ContrastTest}
 \title{Calculate F statistic for contrast comparisons}
 \usage{
-ContrastTest(object, R, r = rep(0, nrow(R)), alpha = 0.05)
+ContrastTest(object, R, alpha = 0.05)
 }
 \arguments{
 \item{object}{an object of LReg}
 
 \item{R}{a matrix of contrast}
 
-\item{r}{the values of testing (default is 0)}
-
 \item{alpha}{level of significance (default is 0.05)}
 }
 \value{
-F statistic, lower and upper bound of F distribution at the level of alpha, and significance status
+F statistic, quantile of F distribution at the level of 1-alpha, and significance status
 }
 \description{
 Calculate F statistic for contrast comparisons

@@ -65,20 +65,19 @@ print.tconf = function(x,...){
 
 #' A method function that modifies the class of LReg object
 #'
-#' @param object an object of LReg
-#' @param myclass the new class you want to add to the object
-#'
+#' @param object_of_LReg an object of LReg
+#' @param myclass a string variable. This is the new class you want to add to the object
 #' @return the LReg object with the new class
 #' @export
 
-AddClass<- function(object, myclass = NULL){
+AddClass<- function(object_of_LReg, myclass = NULL){
 
-  obj_name<- deparse(substitute(object)) # get name of object and transfer it to string
+  obj_name<- deparse(substitute(object_of_LReg)) # get name of object and transfer it to string
   obj_env<- pryr::where(obj_name) # get the environment of the object
-  class(object)<- unique(c(myclass, class(object))) # revise the class of object
-  assign(obj_name, object, envir = obj_env) # assign it to object in its original environment
+  class(object_of_LReg)<- unique(c(myclass, class(object_of_LReg))) # revise the class of objec
+  assign(obj_name, object_of_LReg, envir = obj_env) # assign it to object in its original environment
 
-}
+  }
 
 ###################################################################
 utils::globalVariables(c("x", "sigma2_cor", "beta_hat", "n", "p"))

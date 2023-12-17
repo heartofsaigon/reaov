@@ -4,12 +4,12 @@
 \alias{AddClass}
 \title{A method function that modifies the class of LReg object}
 \usage{
-AddClass(object, myclass = NULL)
+AddClass(object_of_LReg, myclass = NULL)
 }
 \arguments{
-\item{object}{an object of LReg}
+\item{object_of_LReg}{an object of LReg}
 
-\item{myclass}{the new class you want to add to the object}
+\item{myclass}{a string variable. This is the new class you want to add to the object}
 }
 \value{
 the LReg object with the new class
