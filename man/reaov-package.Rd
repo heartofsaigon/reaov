@@ -9,11 +9,12 @@
 This package involves R functions for linear regression analysis and ANOVA. We try not to use the built-in functions but manual formulae in the lecture notes.
 }
 \author{
-\strong{Maintainer}: Yanees Dobberstein \email{yanees.dobberstein@mail.mcgill.ca}
+\strong{Maintainer}: Nam-Anh Tran \email{nam-anh.tran@mail.mcgill.ca}
 
 Authors:
 \itemize{
-  \item Nam-Anh Tran \email{nam-anh.tran@mail.mcgill.ca}
+  \item Yanees Dobberstein \email{yanees.dobberstein@mail.mcgill.ca}
+  \item Bartosz Syroka \email{bartosz.syroka@mail.mcgill.ca}
 }
 
 }

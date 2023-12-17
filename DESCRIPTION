@@ -2,8 +2,9 @@ Package: reaov
 Title: A project of MATH533: A R package for regression and ANOVA
 Version: 0.0.0.9000
 Authors@R: c(
-      person("Nam-Anh", "Tran",, "nam-anh.tran@mail.mcgill.ca", role = c("aut")),
-      person("Yanees", "Dobberstein", ,"yanees.dobberstein@mail.mcgill.ca", role = c("cre"))
+      person("Nam-Anh", "Tran",, "nam-anh.tran@mail.mcgill.ca", role = c("aut","cre")),
+      person("Yanees", "Dobberstein", ,"yanees.dobberstein@mail.mcgill.ca", role = c("aut")),
+      person("Bartosz", "Syroka",, "bartosz.syroka@mail.mcgill.ca", role = c("aut"))
       )
 Description: This package involves R functions for linear regression analysis and ANOVA.
     We try not to use the built-in functions but manual formulae in the lecture notes.
