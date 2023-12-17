@@ -13,7 +13,7 @@ LReg = function(myformula, mydata){
 
   fo = as.character(myformula)
   response = fo[2]
-  covariate = fo[3]|>stringr::str_extract_all("[:alpha:]+")|>
+  covariate = fo[3]|>stringr::str_split(pattern = " *\\+ *")|>
     unlist()
   covariate<- c("1", covariate)
 
